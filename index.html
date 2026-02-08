@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MODI_FI v1 - DUAL DECK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            color: #ff0000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .crt-container {
+            background: #000;
+            border: 3px solid #ff0000;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 0, 0.3),
+                inset 0 0 40px rgba(255, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .crt-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 0, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(255, 0, 0, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff0000;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            letter-spacing: 8px;
+            text-shadow: 0 0 15px #ff0000;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .deck-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .deck {
+            border: 2px solid #ff0000;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.02);
+        }
+
+        .deck-header {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ff0000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .deck-file-input {
+            margin: 10px 0;
+        }
+
+        .deck-file-input input[type="file"] {
+            background: #000;
+            color: #ff0000;
+            border: 1px solid #ff0000;
+            padding: 5px;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .deck-file-input input[type="file"]::file-selector-button {
+            background: #ff0000;
+            color: #000;
+            border: none;
+            padding: 3px 10px;
+            margin-right: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .deck-track-name {
+            font-size: 11px;
+            margin: 5px 0;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .deck-waveform-container {
+            width: 100%;
+            height: 60px;
+            background: rgba(255, 0, 0, 0.05);
+            border: 1px solid #ff0000;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deck-waveform, .deck-visualizer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .deck-visualizer {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .deck-visualizer.active {
+            opacity: 1;
+        }
+
+        .deck-time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin: 5px 0;
+        }
+
+        .deck-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 0, 0, 0.2);
+            margin: 5px 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .deck-progress-fill {
+            height: 100%;
+            background: #ff0000;
+            width: 0%;
+            box-shadow: 0 0 5px #ff0000;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .volume-control label {
+            font-size: 11px;
+            min-width: 35px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            background: rgba(255, 0, 0, 0.2);
+            height: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ff0000;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #ff0000;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #ff0000;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 0 5px #ff0000;
+        }
+
+        .tempo-control {
+            margin: 15px 0;
+        }
+
+        .tempo-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .tempo-fader-track {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            background: #000;
+            border: 2px solid #ff0000;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .tempo-fader-track::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: linear-gradient(to right, 
+                #ff0000 0%, 
+                rgba(255, 0, 0, 0.5) 40%, 
+                rgba(255, 0, 0, 0.1) 50%, 
+                rgba(255, 0, 0, 0.5) 60%, 
+                #ff0000 100%);
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .tempo-fader-track::after {
+            content: '0%';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .tempo-fader-handle {
+            position: absolute;
+            width: 30px;
+            height: 44px;
+            top: 3px;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    #1a0000 0px,
+                    #ff0000 1px,
+                    #ff0000 2px,
+                    #1a0000 3px,
+                    #1a0000 4px,
+                    #ff0000 5px,
+                    #ff0000 6px,
+                    #1a0000 7px
+                );
+            border: 2px solid #ff0000;
+            border-radius: 3px;
+            box-shadow: 
+                0 3px 6px rgba(0, 0, 0, 0.9),
+                0 0 15px rgba(255, 0, 0, 0.7),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+            cursor: grab;
+            user-select: none;
+        }
+
+        .tempo-fader-handle:active {
+            cursor: grabbing;
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 25px rgba(255, 0, 0, 1),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .tempo-value {
+            font-weight: bold;
+            color: #ff0000;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .deck-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background: #000;
+            color: #ff0000;
+            border: 2px solid #ff0000;
+            padding: 8px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn.cue-active {
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 15px #ff0000;
+        }
+
+        .deck-bpm-display {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0000;
+            margin: 10px 0;
+        }
+
+        .mixer-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ff0000;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .mixer-header {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .crossfader-container {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .crossfader-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+
+        .crossfader-track {
+            position: relative;
+            height: 120px;
+            background: #000;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .crossfader-track::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            right: 15%;
+            height: 6px;
+            background: linear-gradient(to right, 
+                #ff0000 0%, 
+                rgba(255, 0, 0, 0.3) 20%, 
+                rgba(255, 0, 0, 0.1) 50%, 
+                rgba(255, 0, 0, 0.3) 80%, 
+                #ff0000 100%);
+            transform: translateY(-50%);
+            border-radius: 3px;
+        }
+
+        .crossfader-handle {
+            position: absolute;
+            width: 40px;
+            height: 100px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    #1a0000 0px,
+                    #ff0000 1px,
+                    #ff0000 2px,
+                    #1a0000 3px,
+                    #1a0000 4px,
+                    #ff0000 5px,
+                    #ff0000 6px,
+                    #1a0000 7px
+                );
+            border: 2px solid #ff0000;
+            border-radius: 4px;
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.9),
+                0 0 25px rgba(255, 0, 0, 0.7),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+            cursor: grab;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .crossfader-handle:active {
+            cursor: grabbing;
+            box-shadow: 
+                0 3px 6px rgba(0, 0, 0, 0.9),
+                0 0 35px rgba(255, 0, 0, 1),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        .crossfader-handle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 3px;
+            background: rgba(255, 0, 0, 0.5);
+            border-radius: 2px;
+        }
+
+        .crossfader-position {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        .tap-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ff0000;
+            background: rgba(255, 0, 0, 0.02);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tap-header {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tap-bpm-display {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ff0000;
+            margin: 20px 0;
+        }
+
+        .tap-button {
+            width: 100%;
+            padding: 25px;
+            font-size: 18px;
+        }
+
+        .tap-history {
+            font-size: 11px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+            opacity: 0.6;
+        }
+
+        .volume-faders-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ff0000;
+            background: rgba(255, 0, 0, 0.02);
+        }
+
+        .volume-fader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .volume-fader-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .volume-fader-track {
+            position: relative;
+            width: 60px;
+            height: 200px;
+            background: #000;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .volume-fader-track::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            bottom: 10%;
+            width: 4px;
+            background: linear-gradient(to bottom, 
+                #ff0000 0%, 
+                rgba(255, 0, 0, 0.3) 20%, 
+                rgba(255, 0, 0, 0.1) 50%, 
+                rgba(255, 0, 0, 0.3) 80%, 
+                #ff0000 100%);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .volume-fader-handle {
+            position: absolute;
+            width: 54px;
+            height: 40px;
+            left: 3px;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    #1a0000 0px,
+                    #ff0000 1px,
+                    #ff0000 2px,
+                    #1a0000 3px,
+                    #1a0000 4px,
+                    #ff0000 5px,
+                    #ff0000 6px,
+                    #1a0000 7px
+                );
+            border: 2px solid #ff0000;
+            border-radius: 4px;
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(255, 0, 0, 0.7),
+                inset 2px 0 4px rgba(255, 255, 255, 0.2),
+                inset -2px 0 4px rgba(0, 0, 0, 0.6);
+            cursor: grab;
+            user-select: none;
+        }
+
+        .volume-fader-handle:active {
+            cursor: grabbing;
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 30px rgba(255, 0, 0, 1),
+                inset 2px 0 4px rgba(255, 255, 255, 0.2),
+                inset -2px 0 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .volume-display {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .status-bar {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #ff0000;
+            font-size: 12px;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .tutorial-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .tutorial-toggle button {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ff0000;
+            border: 2px solid #ff0000;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .tutorial-toggle button:hover {
+            background: rgba(255, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .tutorial-section {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 0;
+            padding: 25px;
+            border: 3px solid #ff0000;
+            background: #000;
+            z-index: 999;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Custom Scrollbar for Tutorial */
+        .tutorial-section::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .tutorial-section::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid #ff0000;
+        }
+
+        .tutorial-section::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border: 1px solid #000;
+        }
+
+        .tutorial-section::-webkit-scrollbar-thumb:hover {
+            background: #cc0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+        }
+
+        /* Firefox Scrollbar */
+        .tutorial-section {
+            scrollbar-width: thin;
+            scrollbar-color: #ff0000 #000;
+        }
+
+        .tutorial-section.hidden {
+            display: none;
+        }
+
+        .tutorial-close {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tutorial-close button {
+            padding: 10px 30px;
+            font-size: 12px;
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+            border: 2px solid #ff0000;
+            cursor: pointer;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tutorial-close button:hover {
+            background: rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 998;
+        }
+
+        .tutorial-overlay.hidden {
+            display: none;
+        }
+
+        .tutorial-header {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .tutorial-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tutorial-column {
+            padding: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            min-width: 0;
+        }
+
+        .tutorial-column h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #ff0000;
+            letter-spacing: 2px;
+        }
+
+        .tutorial-column p {
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .tutorial-column ul {
+            font-size: 11px;
+            line-height: 1.8;
+            padding-left: 20px;
+            opacity: 0.85;
+        }
+
+        .tutorial-column ul li {
+            margin-bottom: 5px;
+        }
+
+        .keyboard-shortcuts {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .keyboard-shortcuts h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #ff0000;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 11px;
+        }
+
+        .keyboard-column h4 {
+            font-size: 12px;
+            color: #ff0000;
+            margin-bottom: 8px;
+        }
+
+        .keyboard-column ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .keyboard-column li {
+            margin-bottom: 4px;
+            opacity: 0.85;
+        }
+
+        .key {
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-container">
+        <div class="header">
+            <h1>MODI_FI</h1>
+            <div class="subtitle">VERSION 1 | DUAL DECK OPERATING SYSTEM</div>
+        </div>
+
+        <!-- TUTORIAL TOGGLE BUTTON -->
+        <div class="tutorial-toggle">
+            <button id="tutorialToggle">?</button>
+        </div>
+
+        <!-- TUTORIAL OVERLAY -->
+        <div class="tutorial-overlay" id="tutorialOverlay"></div>
+
+        <!-- TUTORIAL SECTION -->
+        <div class="tutorial-section">
+            <div class="tutorial-header">OPERATING MANUAL</div>
+            
+            <div class="tutorial-content">
+                <!-- LEFT COLUMN -->
+                <div class="tutorial-column">
+                    <h3>BASIC OPERATION</h3>
+                    <p><strong>1. LOAD TRACKS:</strong> Click "CHOOSE FILE" on each deck to load audio files (MP3, WAV, etc.)</p>
+                    <p><strong>2. PLAYBACK CONTROLS:</strong></p>
+                    <ul>
+                        <li><strong>CUE:</strong> Hold to preview from cue point, releases returns to cue</li>
+                        <li><strong>PLAY:</strong> Start continuous playback from current position</li>
+                        <li><strong>PAUSE:</strong> Stop and set new cue point at current position</li>
+                        <li><strong>STOP:</strong> Stop playback and return to cue point</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 20px;">MIXING CONTROLS</h3>
+                    <p><strong>VOLUME FADERS:</strong> Vertical faders above crossfader control each deck's volume (0-100%)</p>
+                    <p><strong>CROSSFADER:</strong> Horizontal fader blends between decks. Left = Deck A, Center = Both, Right = Deck B</p>
+                    <p><strong>TEMPO FADERS:</strong> Horizontal faders adjust playback speed (±10%). Left = slower, Right = faster</p>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="tutorial-column">
+                    <h3>BPM SYNCHRONIZATION</h3>
+                    <p><strong>TAP TEMPO:</strong> Click the "TAP TEMPO" button on each deck in rhythm with the beat (at least 2 taps). BPM will display above the button.</p>
+                    <p><strong>BEATMATCHING:</strong></p>
+                    <ul>
+                        <li>Tap tempo for both tracks to find their BPMs</li>
+                        <li>Use tempo faders to match the BPMs</li>
+                        <li>Use CUE button to preview and align beats</li>
+                        <li>Use crossfader to transition between tracks</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 20px;">VISUAL FEEDBACK</h3>
+                    <p><strong>WAVEFORM:</strong> Static overview of entire track</p>
+                    <p><strong>VISUALIZER:</strong> Real-time oscilloscope shows current audio</p>
+                    <p><strong>PROGRESS BAR:</strong> Click anywhere to jump to that position</p>
+                </div>
+            </div>
+
+            <!-- KEYBOARD SHORTCUTS -->
+            <div class="keyboard-shortcuts">
+                <h3>KEYBOARD SHORTCUTS</h3>
+                <div class="keyboard-grid">
+                    <div class="keyboard-column">
+                        <h4>DECK A</h4>
+                        <ul>
+                            <li><span class="key">Q</span> Hold for CUE</li>
+                            <li><span class="key">W</span> PLAY</li>
+                            <li><span class="key">E</span> PAUSE</li>
+                            <li><span class="key">R</span> STOP</li>
+                            <li><span class="key">T</span> TAP TEMPO</li>
+                        </ul>
+                    </div>
+                    <div class="keyboard-column">
+                        <h4>DECK B</h4>
+                        <ul>
+                            <li><span class="key">O</span> Hold for CUE</li>
+                            <li><span class="key">P</span> PLAY</li>
+                            <li><span class="key">[</span> PAUSE</li>
+                            <li><span class="key">]</span> STOP</li>
+                            <li><span class="key">;</span> TAP TEMPO</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CLOSE BUTTON -->
+            <div class="tutorial-close">
+                <button id="tutorialClose">CLOSE MANUAL</button>
+            </div>
+        </div>
+
+        <div class="deck-container">
+            <!-- DECK A -->
+            <div class="deck">
+                <div class="deck-header">DECK A</div>
+                
+                <div class="deck-file-input">
+                    <input type="file" id="audioFileA" accept="audio/*">
+                </div>
+
+                <div class="deck-track-name" id="trackNameA">NO FILE LOADED</div>
+
+                <div class="deck-waveform-container">
+                    <canvas id="waveformA" class="deck-waveform"></canvas>
+                    <canvas id="visualizerA" class="deck-visualizer"></canvas>
+                </div>
+
+                <div class="deck-time-display">
+                    <span id="currentTimeA">00:00</span>
+                    <span id="durationA">00:00</span>
+                </div>
+
+                <div class="deck-progress-bar" id="progressBarA">
+                    <div class="deck-progress-fill" id="progressFillA"></div>
+                </div>
+
+                <div class="tempo-control">
+                    <div class="tempo-label">TEMPO</div>
+                    <div class="tempo-fader-track" id="tempoFaderTrackA">
+                        <div class="tempo-fader-handle" id="tempoFaderHandleA"></div>
+                    </div>
+                    <div class="tempo-value" id="tempoDisplayA">0%</div>
+                </div>
+
+                <div class="deck-controls">
+                    <button class="btn" id="cueBtnA" disabled>CUE</button>
+                    <button class="btn" id="playBtnA" disabled>PLAY</button>
+                    <button class="btn" id="pauseBtnA" disabled>PAUSE</button>
+                    <button class="btn" id="stopBtnA" disabled>STOP</button>
+                </div>
+
+                <div class="deck-bpm-display" id="bpmDisplayA">---</div>
+                <button class="btn" id="tapBpmBtnA" style="width: 100%; margin-top: 10px; font-size: 11px;">
+                    TAP TEMPO
+                </button>
+            </div>
+
+            <!-- DECK B -->
+            <div class="deck">
+                <div class="deck-header">DECK B</div>
+                
+                <div class="deck-file-input">
+                    <input type="file" id="audioFileB" accept="audio/*">
+                </div>
+
+                <div class="deck-track-name" id="trackNameB">NO FILE LOADED</div>
+
+                <div class="deck-waveform-container">
+                    <canvas id="waveformB" class="deck-waveform"></canvas>
+                    <canvas id="visualizerB" class="deck-visualizer"></canvas>
+                </div>
+
+                <div class="deck-time-display">
+                    <span id="currentTimeB">00:00</span>
+                    <span id="durationB">00:00</span>
+                </div>
+
+                <div class="deck-progress-bar" id="progressBarB">
+                    <div class="deck-progress-fill" id="progressFillB"></div>
+                </div>
+
+                <div class="tempo-control">
+                    <div class="tempo-label">TEMPO</div>
+                    <div class="tempo-fader-track" id="tempoFaderTrackB">
+                        <div class="tempo-fader-handle" id="tempoFaderHandleB"></div>
+                    </div>
+                    <div class="tempo-value" id="tempoDisplayB">0%</div>
+                </div>
+
+                <div class="deck-controls">
+                    <button class="btn" id="cueBtnB" disabled>CUE</button>
+                    <button class="btn" id="playBtnB" disabled>PLAY</button>
+                    <button class="btn" id="pauseBtnB" disabled>PAUSE</button>
+                    <button class="btn" id="stopBtnB" disabled>STOP</button>
+                </div>
+
+                <div class="deck-bpm-display" id="bpmDisplayB">---</div>
+                <button class="btn" id="tapBpmBtnB" style="width: 100%; margin-top: 10px; font-size: 11px;">
+                    TAP TEMPO
+                </button>
+            </div>
+        </div>
+
+        <!-- VOLUME FADERS SECTION -->
+        <div class="volume-faders-section">
+            <!-- DECK A VOLUME -->
+            <div class="volume-fader-container">
+                <div class="volume-fader-label">DECK A VOLUME</div>
+                <div class="volume-fader-track" id="volumeFaderTrackA">
+                    <div class="volume-fader-handle" id="volumeFaderHandleA"></div>
+                </div>
+                <div class="volume-display" id="volumeDisplayA">80%</div>
+            </div>
+
+            <!-- DECK B VOLUME -->
+            <div class="volume-fader-container">
+                <div class="volume-fader-label">DECK B VOLUME</div>
+                <div class="volume-fader-track" id="volumeFaderTrackB">
+                    <div class="volume-fader-handle" id="volumeFaderHandleB"></div>
+                </div>
+                <div class="volume-display" id="volumeDisplayB">80%</div>
+            </div>
+        </div>
+
+        <!-- MIXER SECTION -->
+        <div class="mixer-section">
+            <div class="mixer-header">CROSSFADER</div>
+            <div class="crossfader-container">
+                <div class="crossfader-label">
+                    <span>◄ DECK A</span>
+                    <span>DECK B ►</span>
+                </div>
+                <div class="crossfader-track" id="crossfaderTrack">
+                    <div class="crossfader-handle" id="crossfaderHandle"></div>
+                </div>
+                <div class="crossfader-position" id="crossfaderPosition">CENTER</div>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            SYSTEM READY ◆ LOAD TRACKS TO BEGIN
+        </div>
+    </div>
+
+    <script>
+        // Audio Context
+        let audioContext = null;
+
+        // Deck A State
+        const deckA = {
+            buffer: null,
+            source: null,
+            gainNode: null,
+            analyzerNode: null,
+            startTime: 0,
+            pauseTime: 0,
+            isPlaying: false,
+            isCueing: false,
+            cuePoint: 0,
+            animationFrameId: null,
+            visualizerFrameId: null,
+            detectedBpm: null,
+            playbackRate: 1.0
+        };
+
+        // Deck B State
+        const deckB = {
+            buffer: null,
+            source: null,
+            gainNode: null,
+            analyzerNode: null,
+            startTime: 0,
+            pauseTime: 0,
+            isPlaying: false,
+            isCueing: false,
+            cuePoint: 0,
+            animationFrameId: null,
+            visualizerFrameId: null,
+            detectedBpm: null,
+            playbackRate: 1.0
+        };
+
+        // Master output
+        let masterGain = null;
+
+        // DOM Elements - Deck A
+        const fileInputA = document.getElementById('audioFileA');
+        const trackNameA = document.getElementById('trackNameA');
+        const waveformCanvasA = document.getElementById('waveformA');
+        const waveformCtxA = waveformCanvasA.getContext('2d');
+        const visualizerCanvasA = document.getElementById('visualizerA');
+        const visualizerCtxA = visualizerCanvasA.getContext('2d');
+        const currentTimeDisplayA = document.getElementById('currentTimeA');
+        const durationDisplayA = document.getElementById('durationA');
+        const progressBarA = document.getElementById('progressBarA');
+        const progressFillA = document.getElementById('progressFillA');
+        const volumeFaderTrackA = document.getElementById('volumeFaderTrackA');
+        const volumeFaderHandleA = document.getElementById('volumeFaderHandleA');
+        const volumeDisplayA = document.getElementById('volumeDisplayA');
+        const tempoFaderTrackA = document.getElementById('tempoFaderTrackA');
+        const tempoFaderHandleA = document.getElementById('tempoFaderHandleA');
+        const tempoDisplayA = document.getElementById('tempoDisplayA');
+        const cueBtnA = document.getElementById('cueBtnA');
+        const playBtnA = document.getElementById('playBtnA');
+        const pauseBtnA = document.getElementById('pauseBtnA');
+        const stopBtnA = document.getElementById('stopBtnA');
+        const bpmDisplayA = document.getElementById('bpmDisplayA');
+        const tapBpmBtnA = document.getElementById('tapBpmBtnA');
+
+        // DOM Elements - Deck B
+        const fileInputB = document.getElementById('audioFileB');
+        const trackNameB = document.getElementById('trackNameB');
+        const waveformCanvasB = document.getElementById('waveformB');
+        const waveformCtxB = waveformCanvasB.getContext('2d');
+        const visualizerCanvasB = document.getElementById('visualizerB');
+        const visualizerCtxB = visualizerCanvasB.getContext('2d');
+        const currentTimeDisplayB = document.getElementById('currentTimeB');
+        const durationDisplayB = document.getElementById('durationB');
+        const progressBarB = document.getElementById('progressBarB');
+        const progressFillB = document.getElementById('progressFillB');
+        const volumeFaderTrackB = document.getElementById('volumeFaderTrackB');
+        const volumeFaderHandleB = document.getElementById('volumeFaderHandleB');
+        const volumeDisplayB = document.getElementById('volumeDisplayB');
+        const tempoFaderTrackB = document.getElementById('tempoFaderTrackB');
+        const tempoFaderHandleB = document.getElementById('tempoFaderHandleB');
+        const tempoDisplayB = document.getElementById('tempoDisplayB');
+        const cueBtnB = document.getElementById('cueBtnB');
+        const playBtnB = document.getElementById('playBtnB');
+        const pauseBtnB = document.getElementById('pauseBtnB');
+        const stopBtnB = document.getElementById('stopBtnB');
+        const bpmDisplayB = document.getElementById('bpmDisplayB');
+        const tapBpmBtnB = document.getElementById('tapBpmBtnB');
+
+        // Mixer
+        const crossfaderTrack = document.getElementById('crossfaderTrack');
+        const crossfaderHandle = document.getElementById('crossfaderHandle');
+        const crossfaderPosition = document.getElementById('crossfaderPosition');
+
+        // Tutorial Toggle
+        const tutorialToggle = document.getElementById('tutorialToggle');
+        const tutorialClose = document.getElementById('tutorialClose');
+        const tutorialSection = document.querySelector('.tutorial-section');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+
+        function showTutorial() {
+            tutorialSection.classList.remove('hidden');
+            tutorialOverlay.classList.remove('hidden');
+        }
+
+        function hideTutorial() {
+            tutorialSection.classList.add('hidden');
+            tutorialOverlay.classList.add('hidden');
+        }
+
+        tutorialToggle.addEventListener('click', showTutorial);
+        tutorialClose.addEventListener('click', hideTutorial);
+        tutorialOverlay.addEventListener('click', hideTutorial);
+
+        // Show tutorial on page load
+        window.addEventListener('load', () => {
+            showTutorial();
+        });
+
+        // Status
+        const statusBar = document.getElementById('statusBar');
+
+        // Initialize canvases
+        waveformCanvasA.width = waveformCanvasA.offsetWidth;
+        waveformCanvasA.height = waveformCanvasA.offsetHeight;
+        visualizerCanvasA.width = visualizerCanvasA.offsetWidth;
+        visualizerCanvasA.height = visualizerCanvasA.offsetHeight;
+
+        waveformCanvasB.width = waveformCanvasB.offsetWidth;
+        waveformCanvasB.height = waveformCanvasB.offsetHeight;
+        visualizerCanvasB.width = visualizerCanvasB.offsetWidth;
+        visualizerCanvasB.height = visualizerCanvasB.offsetHeight;
+
+        // Initialize Audio Context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create master gain
+                masterGain = audioContext.createGain();
+                masterGain.connect(audioContext.destination);
+                
+                // Initialize Deck A
+                deckA.analyzerNode = audioContext.createAnalyser();
+                deckA.analyzerNode.fftSize = 2048;
+                deckA.analyzerNode.smoothingTimeConstant = 0.8;
+                
+                deckA.gainNode = audioContext.createGain();
+                deckA.gainNode.gain.value = 0.8;
+                
+                deckA.analyzerNode.connect(deckA.gainNode);
+                deckA.gainNode.connect(masterGain);
+                
+                // Initialize Deck B
+                deckB.analyzerNode = audioContext.createAnalyser();
+                deckB.analyzerNode.fftSize = 2048;
+                deckB.analyzerNode.smoothingTimeConstant = 0.8;
+                
+                deckB.gainNode = audioContext.createGain();
+                deckB.gainNode.gain.value = 0.8;
+                
+                deckB.analyzerNode.connect(deckB.gainNode);
+                deckB.gainNode.connect(masterGain);
+            }
+        }
+
+        // File loading - Deck A
+        fileInputA.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            trackNameA.textContent = file.name.toUpperCase();
+            statusBar.textContent = 'LOADING DECK A...';
+
+            initAudioContext();
+            stopPlayback(deckA, visualizerCanvasA);
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                deckA.buffer = await audioContext.decodeAudioData(arrayBuffer);
+                drawWaveform(deckA.buffer, waveformCanvasA, waveformCtxA);
+                durationDisplayA.textContent = formatTime(deckA.buffer.duration);
+                
+                statusBar.textContent = 'DECK A LOADED ◆ READY';
+                cueBtnA.disabled = false;
+                playBtnA.disabled = false;
+                pauseBtnA.disabled = false;
+                stopBtnA.disabled = false;
+                
+                // Set initial cue point to start
+                deckA.cuePoint = 0;
+                deckA.pauseTime = 0;
+            } catch (error) {
+                statusBar.textContent = 'ERROR LOADING DECK A';
+                console.error(error);
+            }
+        });
+
+        // File loading - Deck B
+        fileInputB.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            trackNameB.textContent = file.name.toUpperCase();
+            statusBar.textContent = 'LOADING DECK B...';
+
+            initAudioContext();
+            stopPlayback(deckB, visualizerCanvasB);
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                deckB.buffer = await audioContext.decodeAudioData(arrayBuffer);
+                drawWaveform(deckB.buffer, waveformCanvasB, waveformCtxB);
+                durationDisplayB.textContent = formatTime(deckB.buffer.duration);
+                
+                statusBar.textContent = 'DECK B LOADED ◆ READY';
+                cueBtnB.disabled = false;
+                playBtnB.disabled = false;
+                pauseBtnB.disabled = false;
+                stopBtnB.disabled = false;
+                
+                // Set initial cue point to start
+                deckB.cuePoint = 0;
+                deckB.pauseTime = 0;
+            } catch (error) {
+                statusBar.textContent = 'ERROR LOADING DECK B';
+                console.error(error);
+            }
+        });
+
+        // Draw Waveform
+        function drawWaveform(buffer, canvas, ctx) {
+            if (!buffer) return;
+
+            const data = buffer.getChannelData(0);
+            const step = Math.ceil(data.length / canvas.width);
+            const amp = canvas.height / 2;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+
+            for (let i = 0; i < canvas.width; i++) {
+                let min = 1.0;
+                let max = -1.0;
+
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+
+                ctx.moveTo(i, (1 + min) * amp);
+                ctx.lineTo(i, (1 + max) * amp);
+            }
+
+            ctx.stroke();
+        }
+
+        // Draw Visualizer
+        function drawVisualizer(deck, canvas, ctx) {
+            if (!deck.isPlaying || !deck.analyzerNode) return;
+
+            const bufferLength = deck.analyzerNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            deck.analyzerNode.getByteTimeDomainData(dataArray);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ff0000';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff0000';
+
+            ctx.beginPath();
+
+            const sliceWidth = canvas.width / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+
+            deck.visualizerFrameId = requestAnimationFrame(() => drawVisualizer(deck, canvas, ctx));
+        }
+
+        // Stop Visualizer
+        function stopVisualizer(deck, canvas) {
+            if (deck.visualizerFrameId) {
+                cancelAnimationFrame(deck.visualizerFrameId);
+                deck.visualizerFrameId = null;
+            }
+            canvas.classList.remove('active');
+        }
+
+        // Stop Playback
+        function stopPlayback(deck, visualizerCanvas) {
+            if (deck.source) {
+                deck.source.stop();
+                deck.source.disconnect();
+                deck.source = null;
+            }
+            if (deck.animationFrameId) {
+                cancelAnimationFrame(deck.animationFrameId);
+                deck.animationFrameId = null;
+            }
+            stopVisualizer(deck, visualizerCanvas);
+            deck.isPlaying = false;
+        }
+
+        // Update Progress
+        function updateProgress(deck, currentTimeDisplay, progressFill) {
+            if (!deck.isPlaying || !deck.buffer) return;
+            
+            const currentTime = (audioContext.currentTime - deck.startTime) * deck.playbackRate + deck.pauseTime;
+            
+            if (currentTime >= deck.buffer.duration) {
+                stopPlayback(deck, deck === deckA ? visualizerCanvasA : visualizerCanvasB);
+                deck.pauseTime = 0;
+                currentTimeDisplay.textContent = formatTime(deck.buffer.duration);
+                progressFill.style.width = '100%';
+                return;
+            }
+            
+            currentTimeDisplay.textContent = formatTime(currentTime);
+            const progress = (currentTime / deck.buffer.duration) * 100;
+            progressFill.style.width = progress + '%';
+            
+            deck.animationFrameId = requestAnimationFrame(() => updateProgress(deck, currentTimeDisplay, progressFill));
+        }
+
+        // Play Deck
+        async function playDeck(deck, visualizerCanvas, visualizerCtx, deckName) {
+            if (!deck.buffer) return;
+            
+            try {
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                deck.source = audioContext.createBufferSource();
+                deck.source.buffer = deck.buffer;
+                deck.source.playbackRate.value = deck.playbackRate;
+                deck.source.connect(deck.analyzerNode);
+                
+                deck.startTime = audioContext.currentTime;
+                deck.source.start(0, deck.pauseTime);
+                
+                deck.isPlaying = true;
+                statusBar.textContent = `▶ ${deckName} PLAYING...`;
+                
+                visualizerCanvas.classList.add('active');
+                drawVisualizer(deck, visualizerCanvas, visualizerCtx);
+                
+                const currentTimeDisplay = deck === deckA ? currentTimeDisplayA : currentTimeDisplayB;
+                const progressFill = deck === deckA ? progressFillA : progressFillB;
+                updateProgress(deck, currentTimeDisplay, progressFill);
+                
+                deck.source.onended = () => {
+                    if (deck.isPlaying) {
+                        stopPlayback(deck, visualizerCanvas);
+                        deck.pauseTime = 0;
+                        statusBar.textContent = `${deckName} COMPLETE`;
+                    }
+                };
+            } catch (error) {
+                console.error('Playback error:', error);
+                statusBar.textContent = `ERROR: ${deckName} PLAYBACK FAILED`;
+            }
+        }
+
+        // Pause Deck
+        function pauseDeck(deck, visualizerCanvas, deckName) {
+            if (!deck.isPlaying) return;
+            
+            deck.pauseTime = (audioContext.currentTime - deck.startTime) * deck.playbackRate + deck.pauseTime;
+            stopPlayback(deck, visualizerCanvas);
+            statusBar.textContent = `❚❚ ${deckName} PAUSED AT CUE`;
+        }
+
+        // Turntable-style Controls - Deck A
+        
+        // CUE button - Hold to preview, release to return to cue point
+        cueBtnA.addEventListener('mousedown', () => {
+            if (!deckA.buffer || deckA.isPlaying) return;
+            
+            // Visual feedback
+            cueBtnA.classList.add('cue-active');
+            
+            // Start cueing from cue point
+            deckA.isCueing = true;
+            deckA.pauseTime = deckA.cuePoint;
+            playDeck(deckA, visualizerCanvasA, visualizerCtxA, 'DECK A [CUE]');
+        });
+        
+        cueBtnA.addEventListener('mouseup', () => {
+            if (!deckA.isCueing) return;
+            
+            // Remove visual feedback
+            cueBtnA.classList.remove('cue-active');
+            
+            // Return to cue point
+            stopPlayback(deckA, visualizerCanvasA);
+            deckA.isCueing = false;
+            deckA.pauseTime = deckA.cuePoint;
+            currentTimeDisplayA.textContent = formatTime(deckA.cuePoint);
+            progressFillA.style.width = (deckA.cuePoint / deckA.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK A READY AT CUE';
+        });
+        
+        cueBtnA.addEventListener('mouseleave', () => {
+            if (deckA.isCueing) {
+                cueBtnA.dispatchEvent(new Event('mouseup'));
+            }
+        });
+        
+        // PLAY button - Click to play/continue from current position
+        playBtnA.addEventListener('click', () => {
+            if (deckA.isPlaying || deckA.isCueing) return;
+            playDeck(deckA, visualizerCanvasA, visualizerCtxA, 'DECK A');
+        });
+        
+        // PAUSE button - Pause and set new cue point at current position
+        pauseBtnA.addEventListener('click', () => {
+            if (!deckA.isPlaying) return;
+            
+            const currentTime = (audioContext.currentTime - deckA.startTime) * deckA.playbackRate + deckA.pauseTime;
+            deckA.cuePoint = currentTime;
+            pauseDeck(deckA, visualizerCanvasA, 'DECK A');
+        });
+
+        // STOP button - Stop playback and return to cue point
+        stopBtnA.addEventListener('click', () => {
+            if (!deckA.isPlaying && !deckA.isCueing) return;
+            
+            stopPlayback(deckA, visualizerCanvasA);
+            deckA.isCueing = false;
+            deckA.pauseTime = deckA.cuePoint;
+            currentTimeDisplayA.textContent = formatTime(deckA.cuePoint);
+            progressFillA.style.width = (deckA.cuePoint / deckA.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK A STOPPED AT CUE';
+        });
+
+        // Turntable-style Controls - Deck B
+        
+        // CUE button - Hold to preview, release to return to cue point
+        cueBtnB.addEventListener('mousedown', () => {
+            if (!deckB.buffer || deckB.isPlaying) return;
+            
+            // Visual feedback
+            cueBtnB.classList.add('cue-active');
+            
+            // Start cueing from cue point
+            deckB.isCueing = true;
+            deckB.pauseTime = deckB.cuePoint;
+            playDeck(deckB, visualizerCanvasB, visualizerCtxB, 'DECK B [CUE]');
+        });
+        
+        cueBtnB.addEventListener('mouseup', () => {
+            if (!deckB.isCueing) return;
+            
+            // Remove visual feedback
+            cueBtnB.classList.remove('cue-active');
+            
+            // Return to cue point
+            stopPlayback(deckB, visualizerCanvasB);
+            deckB.isCueing = false;
+            deckB.pauseTime = deckB.cuePoint;
+            currentTimeDisplayB.textContent = formatTime(deckB.cuePoint);
+            progressFillB.style.width = (deckB.cuePoint / deckB.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK B READY AT CUE';
+        });
+        
+        cueBtnB.addEventListener('mouseleave', () => {
+            if (deckB.isCueing) {
+                cueBtnB.dispatchEvent(new Event('mouseup'));
+            }
+        });
+        
+        // PLAY button - Click to play/continue from current position
+        playBtnB.addEventListener('click', () => {
+            if (deckB.isPlaying || deckB.isCueing) return;
+            playDeck(deckB, visualizerCanvasB, visualizerCtxB, 'DECK B');
+        });
+        
+        // PAUSE button - Pause and set new cue point at current position
+        pauseBtnB.addEventListener('click', () => {
+            if (!deckB.isPlaying) return;
+            
+            const currentTime = (audioContext.currentTime - deckB.startTime) * deckB.playbackRate + deckB.pauseTime;
+            deckB.cuePoint = currentTime;
+            pauseDeck(deckB, visualizerCanvasB, 'DECK B');
+        });
+
+        // STOP button - Stop playback and return to cue point
+        stopBtnB.addEventListener('click', () => {
+            if (!deckB.isPlaying && !deckB.isCueing) return;
+            
+            stopPlayback(deckB, visualizerCanvasB);
+            deckB.isCueing = false;
+            deckB.pauseTime = deckB.cuePoint;
+            currentTimeDisplayB.textContent = formatTime(deckB.cuePoint);
+            progressFillB.style.width = (deckB.cuePoint / deckB.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK B STOPPED AT CUE';
+        });
+
+        // Vertical Volume Faders
+        let isDraggingVolumeA = false;
+        let isDraggingVolumeB = false;
+        let volumeValueA = 80; // 0-100
+        let volumeValueB = 80; // 0-100
+
+        function updateVolumeFader(deck, track, handle, display, value, isDeckA) {
+            const volume = Math.max(0, Math.min(100, value));
+            if (isDeckA) {
+                volumeValueA = volume;
+            } else {
+                volumeValueB = volume;
+            }
+            
+            // Update handle position (inverted - top is 100%, bottom is 0%)
+            const trackHeight = track.offsetHeight;
+            const handleHeight = handle.offsetHeight;
+            const maxY = trackHeight - handleHeight - 6; // Account for padding
+            const position = maxY - ((volume / 100) * maxY);
+            
+            handle.style.top = position + 'px';
+            
+            // Apply volume
+            if (deck.gainNode) {
+                // Get current crossfader position
+                const crossfaderPos = crossfaderValue / 100;
+                const gainA = Math.cos(crossfaderPos * Math.PI / 2);
+                const gainB = Math.sin(crossfaderPos * Math.PI / 2);
+                
+                if (isDeckA) {
+                    deck.gainNode.gain.value = (volume / 100) * gainA;
+                } else {
+                    deck.gainNode.gain.value = (volume / 100) * gainB;
+                }
+            }
+            
+            display.textContent = Math.round(volume) + '%';
+        }
+
+        // Deck A Volume Fader
+        volumeFaderHandleA.addEventListener('mousedown', (e) => {
+            isDraggingVolumeA = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingVolumeA) {
+                const rect = volumeFaderTrackA.getBoundingClientRect();
+                const y = e.clientY - rect.top;
+                const trackHeight = rect.height;
+                // Invert: top = 100%, bottom = 0%
+                const value = ((trackHeight - y) / trackHeight) * 100;
+                updateVolumeFader(deckA, volumeFaderTrackA, volumeFaderHandleA, volumeDisplayA, value, true);
+            }
+            if (isDraggingVolumeB) {
+                const rect = volumeFaderTrackB.getBoundingClientRect();
+                const y = e.clientY - rect.top;
+                const trackHeight = rect.height;
+                const value = ((trackHeight - y) / trackHeight) * 100;
+                updateVolumeFader(deckB, volumeFaderTrackB, volumeFaderHandleB, volumeDisplayB, value, false);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingVolumeA = false;
+            isDraggingVolumeB = false;
+        });
+
+        // Deck B Volume Fader
+        volumeFaderHandleB.addEventListener('mousedown', (e) => {
+            isDraggingVolumeB = true;
+            e.preventDefault();
+        });
+
+        // Click on track to jump
+        volumeFaderTrackA.addEventListener('click', (e) => {
+            if (e.target === volumeFaderHandleA) return;
+            const rect = volumeFaderTrackA.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const trackHeight = rect.height;
+            const value = ((trackHeight - y) / trackHeight) * 100;
+            updateVolumeFader(deckA, volumeFaderTrackA, volumeFaderHandleA, volumeDisplayA, value, true);
+        });
+
+        volumeFaderTrackB.addEventListener('click', (e) => {
+            if (e.target === volumeFaderHandleB) return;
+            const rect = volumeFaderTrackB.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const trackHeight = rect.height;
+            const value = ((trackHeight - y) / trackHeight) * 100;
+            updateVolumeFader(deckB, volumeFaderTrackB, volumeFaderHandleB, volumeDisplayB, value, false);
+        });
+
+        // Initialize volume faders
+        updateVolumeFader(deckA, volumeFaderTrackA, volumeFaderHandleA, volumeDisplayA, 80, true);
+        updateVolumeFader(deckB, volumeFaderTrackB, volumeFaderHandleB, volumeDisplayB, 80, false);
+
+        // Vertical Tempo Faders
+        let isDraggingTempoA = false;
+        let isDraggingTempoB = false;
+        let tempoValueA = 0; // -10 to +10
+        let tempoValueB = 0; // -10 to +10
+
+        function updateTempoFader(deck, track, handle, display, value, isDeckA) {
+            const tempo = Math.max(-10, Math.min(10, value));
+            if (isDeckA) {
+                tempoValueA = tempo;
+            } else {
+                tempoValueB = tempo;
+            }
+            
+            // Update handle position (left is -10%, center is 0%, right is +10%)
+            const trackWidth = track.offsetWidth;
+            const handleWidth = handle.offsetWidth;
+            const maxX = trackWidth - handleWidth - 6; // Account for padding
+            // Map -10 to 10 range to 0 to maxX (left is -10, right is +10)
+            const normalizedValue = (tempo + 10) / 20; // 0 to 1
+            const position = normalizedValue * maxX + 3; // Add padding offset
+            
+            handle.style.left = position + 'px';
+            
+            // Apply tempo
+            deck.playbackRate = 1.0 + (tempo / 100);
+            if (deck.source) {
+                deck.source.playbackRate.value = deck.playbackRate;
+            }
+            
+            display.textContent = (tempo > 0 ? '+' : '') + tempo.toFixed(1) + '%';
+        }
+
+        // Deck A Tempo Fader
+        tempoFaderHandleA.addEventListener('mousedown', (e) => {
+            isDraggingTempoA = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingTempoA) {
+                const rect = tempoFaderTrackA.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const trackWidth = rect.width;
+                // Map x position to -10 to +10 range (left = -10, right = +10)
+                const normalizedX = (x - 3) / (trackWidth - 6); // 0 to 1
+                const value = (normalizedX * 20) - 10; // -10 to +10
+                updateTempoFader(deckA, tempoFaderTrackA, tempoFaderHandleA, tempoDisplayA, value, true);
+            }
+            if (isDraggingTempoB) {
+                const rect = tempoFaderTrackB.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const trackWidth = rect.width;
+                const normalizedX = (x - 3) / (trackWidth - 6);
+                const value = (normalizedX * 20) - 10;
+                updateTempoFader(deckB, tempoFaderTrackB, tempoFaderHandleB, tempoDisplayB, value, false);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingTempoA = false;
+            isDraggingTempoB = false;
+        });
+
+        // Deck B Tempo Fader
+        tempoFaderHandleB.addEventListener('mousedown', (e) => {
+            isDraggingTempoB = true;
+            e.preventDefault();
+        });
+
+        // Click on track to jump
+        tempoFaderTrackA.addEventListener('click', (e) => {
+            if (e.target === tempoFaderHandleA) return;
+            const rect = tempoFaderTrackA.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const trackWidth = rect.width;
+            const normalizedX = (x - 3) / (trackWidth - 6);
+            const value = (normalizedX * 20) - 10;
+            updateTempoFader(deckA, tempoFaderTrackA, tempoFaderHandleA, tempoDisplayA, value, true);
+        });
+
+        tempoFaderTrackB.addEventListener('click', (e) => {
+            if (e.target === tempoFaderHandleB) return;
+            const rect = tempoFaderTrackB.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const trackWidth = rect.width;
+            const normalizedX = (x - 3) / (trackWidth - 6);
+            const value = (normalizedX * 20) - 10;
+            updateTempoFader(deckB, tempoFaderTrackB, tempoFaderHandleB, tempoDisplayB, value, false);
+        });
+
+        // Initialize tempo faders at 0%
+        updateTempoFader(deckA, tempoFaderTrackA, tempoFaderHandleA, tempoDisplayA, 0, true);
+        updateTempoFader(deckB, tempoFaderTrackB, tempoFaderHandleB, tempoDisplayB, 0, false);
+
+        // Custom Crossfader
+        let isDragging = false;
+        let crossfaderValue = 50; // 0-100, 50 is center
+
+        function updateCrossfader(value) {
+            crossfaderValue = Math.max(0, Math.min(100, value));
+            
+            // Update handle position
+            const trackWidth = crossfaderTrack.offsetWidth;
+            const handleWidth = crossfaderHandle.offsetWidth;
+            const maxX = trackWidth - handleWidth - 20; // Account for padding
+            const position = (crossfaderValue / 100) * maxX + 10; // Add padding offset
+            
+            crossfaderHandle.style.left = position + 'px';
+            crossfaderHandle.style.transform = 'translateX(0)';
+            
+            // Apply crossfade
+            const normalizedValue = crossfaderValue / 100;
+            const gainA = Math.cos(normalizedValue * Math.PI / 2);
+            const gainB = Math.sin(normalizedValue * Math.PI / 2);
+            
+            if (deckA.gainNode) {
+                deckA.gainNode.gain.value = (volumeValueA / 100) * gainA;
+            }
+            if (deckB.gainNode) {
+                deckB.gainNode.gain.value = (volumeValueB / 100) * gainB;
+            }
+            
+            // Update position indicator
+            if (crossfaderValue < 25) {
+                crossfaderPosition.textContent = 'DECK A';
+            } else if (crossfaderValue > 75) {
+                crossfaderPosition.textContent = 'DECK B';
+            } else {
+                crossfaderPosition.textContent = 'CENTER';
+            }
+        }
+
+        crossfaderHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const rect = crossfaderTrack.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const trackWidth = rect.width;
+            const value = ((x - 10) / (trackWidth - 20)) * 100; // Account for padding
+            
+            updateCrossfader(value);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Click on track to jump
+        crossfaderTrack.addEventListener('click', (e) => {
+            if (e.target === crossfaderHandle) return;
+            
+            const rect = crossfaderTrack.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const trackWidth = rect.width;
+            const value = ((x - 10) / (trackWidth - 20)) * 100;
+            
+            updateCrossfader(value);
+        });
+
+        // Initialize crossfader at center
+        updateCrossfader(50);
+
+        // Progress Bar Seeking
+        progressBarA.addEventListener('click', (e) => {
+            if (!deckA.buffer) return;
+            const rect = progressBarA.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            deckA.pauseTime = percent * deckA.buffer.duration;
+            
+            if (deckA.isPlaying) {
+                stopPlayback(deckA, visualizerCanvasA);
+                playDeck(deckA, visualizerCanvasA, visualizerCtxA, 'DECK A');
+            } else {
+                currentTimeDisplayA.textContent = formatTime(deckA.pauseTime);
+                progressFillA.style.width = (percent * 100) + '%';
+            }
+        });
+
+        progressBarB.addEventListener('click', (e) => {
+            if (!deckB.buffer) return;
+            const rect = progressBarB.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            deckB.pauseTime = percent * deckB.buffer.duration;
+            
+            if (deckB.isPlaying) {
+                stopPlayback(deckB, visualizerCanvasB);
+                playDeck(deckB, visualizerCanvasB, visualizerCtxB, 'DECK B');
+            } else {
+                currentTimeDisplayB.textContent = formatTime(deckB.pauseTime);
+                progressFillB.style.width = (percent * 100) + '%';
+            }
+        });
+
+        // Tap Tempo - Individual for each deck
+        let tapTimesA = [];
+        let tapTimesB = [];
+        const maxTaps = 8;
+        const tapTimeout = 2000;
+
+        // Deck A Tap Tempo
+        tapBpmBtnA.addEventListener('click', () => {
+            const now = Date.now();
+            
+            if (tapTimesA.length > 0 && now - tapTimesA[tapTimesA.length - 1] > tapTimeout) {
+                tapTimesA = [];
+            }
+            
+            tapTimesA.push(now);
+            
+            if (tapTimesA.length > maxTaps) {
+                tapTimesA.shift();
+            }
+            
+            if (tapTimesA.length >= 2) {
+                const intervals = [];
+                for (let i = 1; i < tapTimesA.length; i++) {
+                    intervals.push(tapTimesA[i] - tapTimesA[i - 1]);
+                }
+                
+                const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                const bpm = 60000 / avgInterval;
+                
+                deckA.detectedBpm = Math.round(bpm);
+                bpmDisplayA.textContent = Math.round(bpm);
+                statusBar.textContent = `DECK A: ${Math.round(bpm)} BPM (${tapTimesA.length} TAPS)`;
+            } else {
+                bpmDisplayA.textContent = '---';
+                statusBar.textContent = 'DECK A: TAP AT LEAST TWICE';
+            }
+        });
+
+        // Deck B Tap Tempo
+        tapBpmBtnB.addEventListener('click', () => {
+            const now = Date.now();
+            
+            if (tapTimesB.length > 0 && now - tapTimesB[tapTimesB.length - 1] > tapTimeout) {
+                tapTimesB = [];
+            }
+            
+            tapTimesB.push(now);
+            
+            if (tapTimesB.length > maxTaps) {
+                tapTimesB.shift();
+            }
+            
+            if (tapTimesB.length >= 2) {
+                const intervals = [];
+                for (let i = 1; i < tapTimesB.length; i++) {
+                    intervals.push(tapTimesB[i] - tapTimesB[i - 1]);
+                }
+                
+                const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                const bpm = 60000 / avgInterval;
+                
+                deckB.detectedBpm = Math.round(bpm);
+                bpmDisplayB.textContent = Math.round(bpm);
+                statusBar.textContent = `DECK B: ${Math.round(bpm)} BPM (${tapTimesB.length} TAPS)`;
+            } else {
+                bpmDisplayB.textContent = '---';
+                statusBar.textContent = 'DECK B: TAP AT LEAST TWICE';
+            }
+        });
+
+        // Format Time
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Keyboard Shortcuts
+        let keysPressed = {};
+        
+        document.addEventListener('keydown', (e) => {
+            if (keysPressed[e.code]) return; // Prevent repeat
+            keysPressed[e.code] = true;
+            
+            // Deck A - Q key for CUE (hold), W for PLAY, E for PAUSE, R for STOP, T for TAP TEMPO
+            if (e.code === 'KeyQ' && !cueBtnA.disabled) {
+                cueBtnA.dispatchEvent(new Event('mousedown'));
+            } else if (e.code === 'KeyW' && !playBtnA.disabled) {
+                playBtnA.click();
+            } else if (e.code === 'KeyE' && !pauseBtnA.disabled) {
+                pauseBtnA.click();
+            } else if (e.code === 'KeyR' && !stopBtnA.disabled) {
+                stopBtnA.click();
+            } else if (e.code === 'KeyT') {
+                e.preventDefault();
+                tapBpmBtnA.click();
+            }
+            // Deck B - O key for CUE (hold), P for PLAY, [ for PAUSE, ] for STOP, ; for TAP TEMPO
+            else if (e.code === 'KeyO' && !cueBtnB.disabled) {
+                cueBtnB.dispatchEvent(new Event('mousedown'));
+            } else if (e.code === 'KeyP' && !playBtnB.disabled) {
+                playBtnB.click();
+            } else if (e.code === 'BracketLeft' && !pauseBtnB.disabled) {
+                pauseBtnB.click();
+            } else if (e.code === 'BracketRight' && !stopBtnB.disabled) {
+                stopBtnB.click();
+            } else if (e.code === 'Semicolon') {
+                e.preventDefault();
+                tapBpmBtnB.click();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keysPressed[e.code] = false;
+            
+            // Release CUE buttons
+            if (e.code === 'KeyQ') {
+                cueBtnA.dispatchEvent(new Event('mouseup'));
+            } else if (e.code === 'KeyO') {
+                cueBtnB.dispatchEvent(new Event('mouseup'));
+            }
+        });
+    </script>
+</body>
+</html>

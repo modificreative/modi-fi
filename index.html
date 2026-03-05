@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MODI_FI v1 - DUAL DECK</title>
+    <title>DDOS | PLAYER v1 - DUAL DECK</title>
     <style>
         * {
             margin: 0;
@@ -838,12 +838,157 @@
             font-weight: bold;
             margin-right: 5px;
         }
+
+        /* MOBILE RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+                letter-spacing: 4px;
+            }
+
+            .header .subtitle {
+                font-size: 10px;
+            }
+
+            .deck-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .volume-faders-section {
+                grid-template-columns: 1fr 1fr;
+                padding: 15px;
+                gap: 20px;
+            }
+
+            .volume-fader-track {
+                height: 150px;
+            }
+
+            .mixer-section {
+                padding: 15px;
+            }
+
+            .crossfader-track {
+                height: 80px;
+            }
+
+            .tutorial-section {
+                width: 95%;
+                max-height: 90vh;
+                padding: 15px;
+            }
+
+            .tutorial-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .keyboard-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .tutorial-toggle {
+                top: 10px;
+                right: 10px;
+            }
+
+            .tutorial-toggle button {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .tempo-fader-track {
+                height: 60px;
+            }
+
+            .deck-controls {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 10px;
+                font-size: 11px;
+            }
+
+            .waveform-canvas,
+            .visualizer-canvas {
+                height: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+                letter-spacing: 2px;
+            }
+
+            .header .subtitle {
+                font-size: 8px;
+            }
+
+            .volume-fader-track {
+                height: 120px;
+                width: 50px;
+            }
+
+            .volume-fader-handle {
+                width: 44px;
+                height: 35px;
+            }
+
+            .crossfader-track {
+                height: 60px;
+            }
+
+            .crossfader-handle {
+                width: 30px;
+                height: 54px;
+            }
+
+            .tempo-fader-track {
+                height: 50px;
+            }
+
+            .btn {
+                padding: 8px;
+                font-size: 10px;
+            }
+
+            .deck-controls {
+                gap: 5px;
+            }
+
+            .tutorial-section {
+                padding: 10px;
+                font-size: 11px;
+            }
+
+            .tutorial-header {
+                font-size: 14px;
+            }
+
+            .tutorial-column h3 {
+                font-size: 12px;
+            }
+
+            .tutorial-column p,
+            .tutorial-column ul {
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="crt-container">
         <div class="header">
-            <h1>MODI_FI</h1>
+            <h1>DDOS | PLAYER</h1>
             <div class="subtitle">VERSION 1 | DUAL DECK OPERATING SYSTEM</div>
         </div>
 
@@ -1473,9 +1618,38 @@
             deckA.pauseTime = deckA.cuePoint;
             playDeck(deckA, visualizerCanvasA, visualizerCtxA, 'DECK A [CUE]');
         });
+
+        cueBtnA.addEventListener('touchstart', (e) => {
+            if (!deckA.buffer || deckA.isPlaying) return;
+            e.preventDefault();
+            
+            // Visual feedback
+            cueBtnA.classList.add('cue-active');
+            
+            // Start cueing from cue point
+            deckA.isCueing = true;
+            deckA.pauseTime = deckA.cuePoint;
+            playDeck(deckA, visualizerCanvasA, visualizerCtxA, 'DECK A [CUE]');
+        });
         
         cueBtnA.addEventListener('mouseup', () => {
             if (!deckA.isCueing) return;
+            
+            // Remove visual feedback
+            cueBtnA.classList.remove('cue-active');
+            
+            // Return to cue point
+            stopPlayback(deckA, visualizerCanvasA);
+            deckA.isCueing = false;
+            deckA.pauseTime = deckA.cuePoint;
+            currentTimeDisplayA.textContent = formatTime(deckA.cuePoint);
+            progressFillA.style.width = (deckA.cuePoint / deckA.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK A READY AT CUE';
+        });
+
+        cueBtnA.addEventListener('touchend', (e) => {
+            if (!deckA.isCueing) return;
+            e.preventDefault();
             
             // Remove visual feedback
             cueBtnA.classList.remove('cue-active');
@@ -1536,9 +1710,38 @@
             deckB.pauseTime = deckB.cuePoint;
             playDeck(deckB, visualizerCanvasB, visualizerCtxB, 'DECK B [CUE]');
         });
+
+        cueBtnB.addEventListener('touchstart', (e) => {
+            if (!deckB.buffer || deckB.isPlaying) return;
+            e.preventDefault();
+            
+            // Visual feedback
+            cueBtnB.classList.add('cue-active');
+            
+            // Start cueing from cue point
+            deckB.isCueing = true;
+            deckB.pauseTime = deckB.cuePoint;
+            playDeck(deckB, visualizerCanvasB, visualizerCtxB, 'DECK B [CUE]');
+        });
         
         cueBtnB.addEventListener('mouseup', () => {
             if (!deckB.isCueing) return;
+            
+            // Remove visual feedback
+            cueBtnB.classList.remove('cue-active');
+            
+            // Return to cue point
+            stopPlayback(deckB, visualizerCanvasB);
+            deckB.isCueing = false;
+            deckB.pauseTime = deckB.cuePoint;
+            currentTimeDisplayB.textContent = formatTime(deckB.cuePoint);
+            progressFillB.style.width = (deckB.cuePoint / deckB.buffer.duration * 100) + '%';
+            statusBar.textContent = 'DECK B READY AT CUE';
+        });
+
+        cueBtnB.addEventListener('touchend', (e) => {
+            if (!deckB.isCueing) return;
+            e.preventDefault();
             
             // Remove visual feedback
             cueBtnB.classList.remove('cue-active');
@@ -1630,6 +1833,11 @@
             e.preventDefault();
         });
 
+        volumeFaderHandleA.addEventListener('touchstart', (e) => {
+            isDraggingVolumeA = true;
+            e.preventDefault();
+        });
+
         document.addEventListener('mousemove', (e) => {
             if (isDraggingVolumeA) {
                 const rect = volumeFaderTrackA.getBoundingClientRect();
@@ -1648,13 +1856,42 @@
             }
         });
 
+        document.addEventListener('touchmove', (e) => {
+            if (isDraggingVolumeA) {
+                const touch = e.touches[0];
+                const rect = volumeFaderTrackA.getBoundingClientRect();
+                const y = touch.clientY - rect.top;
+                const trackHeight = rect.height;
+                const value = ((trackHeight - y) / trackHeight) * 100;
+                updateVolumeFader(deckA, volumeFaderTrackA, volumeFaderHandleA, volumeDisplayA, value, true);
+            }
+            if (isDraggingVolumeB) {
+                const touch = e.touches[0];
+                const rect = volumeFaderTrackB.getBoundingClientRect();
+                const y = touch.clientY - rect.top;
+                const trackHeight = rect.height;
+                const value = ((trackHeight - y) / trackHeight) * 100;
+                updateVolumeFader(deckB, volumeFaderTrackB, volumeFaderHandleB, volumeDisplayB, value, false);
+            }
+        });
+
         document.addEventListener('mouseup', () => {
+            isDraggingVolumeA = false;
+            isDraggingVolumeB = false;
+        });
+
+        document.addEventListener('touchend', () => {
             isDraggingVolumeA = false;
             isDraggingVolumeB = false;
         });
 
         // Deck B Volume Fader
         volumeFaderHandleB.addEventListener('mousedown', (e) => {
+            isDraggingVolumeB = true;
+            e.preventDefault();
+        });
+
+        volumeFaderHandleB.addEventListener('touchstart', (e) => {
             isDraggingVolumeB = true;
             e.preventDefault();
         });
@@ -1721,6 +1958,11 @@
             e.preventDefault();
         });
 
+        tempoFaderHandleA.addEventListener('touchstart', (e) => {
+            isDraggingTempoA = true;
+            e.preventDefault();
+        });
+
         document.addEventListener('mousemove', (e) => {
             if (isDraggingTempoA) {
                 const rect = tempoFaderTrackA.getBoundingClientRect();
@@ -1741,13 +1983,44 @@
             }
         });
 
+        document.addEventListener('touchmove', (e) => {
+            if (isDraggingTempoA) {
+                const touch = e.touches[0];
+                const rect = tempoFaderTrackA.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const trackWidth = rect.width;
+                const normalizedX = (x - 3) / (trackWidth - 6);
+                const value = (normalizedX * 20) - 10;
+                updateTempoFader(deckA, tempoFaderTrackA, tempoFaderHandleA, tempoDisplayA, value, true);
+            }
+            if (isDraggingTempoB) {
+                const touch = e.touches[0];
+                const rect = tempoFaderTrackB.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const trackWidth = rect.width;
+                const normalizedX = (x - 3) / (trackWidth - 6);
+                const value = (normalizedX * 20) - 10;
+                updateTempoFader(deckB, tempoFaderTrackB, tempoFaderHandleB, tempoDisplayB, value, false);
+            }
+        });
+
         document.addEventListener('mouseup', () => {
+            isDraggingTempoA = false;
+            isDraggingTempoB = false;
+        });
+
+        document.addEventListener('touchend', () => {
             isDraggingTempoA = false;
             isDraggingTempoB = false;
         });
 
         // Deck B Tempo Fader
         tempoFaderHandleB.addEventListener('mousedown', (e) => {
+            isDraggingTempoB = true;
+            e.preventDefault();
+        });
+
+        tempoFaderHandleB.addEventListener('touchstart', (e) => {
             isDraggingTempoB = true;
             e.preventDefault();
         });
@@ -1820,6 +2093,11 @@
             e.preventDefault();
         });
 
+        crossfaderHandle.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             
@@ -1831,7 +2109,23 @@
             updateCrossfader(value);
         });
 
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const rect = crossfaderTrack.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const trackWidth = rect.width;
+            const value = ((x - 10) / (trackWidth - 20)) * 100;
+            
+            updateCrossfader(value);
+        });
+
         document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        document.addEventListener('touchend', () => {
             isDragging = false;
         });
 
